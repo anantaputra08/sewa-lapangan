@@ -61,7 +61,7 @@
                             <div class="md:col-span-2">
                                 <x-input-label for="photo" value="Ganti Foto Lapangan (Opsional)" />
                                 <div class="mt-2 flex items-center space-x-4">
-                                    <img src="{{ $lapangan->photo ? asset($lapangan->photo) : 'https://placehold.co/100x100/e2e8f0/e2e8f0?text=No+Image' }}"
+                                    <img src="{{ $lapangan->photo ? asset('storage/' . $lapangan->photo) : 'https://placehold.co/100x100/e2e8f0/e2e8f0?text=No+Image' }}"
                                         alt="Foto saat ini" class="w-24 h-24 object-cover rounded">
                                     <input id="photo" name="photo" type="file"
                                         class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />

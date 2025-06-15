@@ -6,6 +6,7 @@ use App\Http\Controllers\DayController;
 use App\Http\Controllers\LapanganController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SessionHourController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -28,6 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('session-hours', SessionHourController::class);
     Route::resource('days', DayController::class);
     Route::resource('bookings', BookingController::class);
+    Route::resource('users', UserController::class);
 });
 
 require __DIR__.'/auth.php';

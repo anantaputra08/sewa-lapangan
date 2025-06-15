@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Lapangan extends Model
 {
@@ -26,6 +27,7 @@ class Lapangan extends Model
     protected $casts = [
         'price' => 'decimal:2',
     ];
+    protected $appends = ['photo_url'];
     /**
      * Get the category that owns the Lapangan.
      */
@@ -40,5 +42,15 @@ class Lapangan extends Model
     public function bookings()
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function getPhotoUrlAttribute()
+    {
+        if ($this->photo) {
+            // Menggunakan Storage::url() untuk mendapatkan URL publik
+            // yang akan digabungkan dengan APP_URL secara otomatis.
+            return Storage::disk('public')->url($this->photo);
+        }
+        return null;
     }
 }

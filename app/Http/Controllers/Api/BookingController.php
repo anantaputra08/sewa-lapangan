@@ -10,11 +10,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class BookingController extends Controller
 {
+
     /**
-     * NEW: Get all lapangans and their availability for a specific date.
+     * Get all lapangans and their availability for a specific date.
      */
     public function getAvailableLapangans(Request $request)
     {
@@ -52,9 +54,8 @@ class BookingController extends Controller
                 'category' => $lapangan->category->name ?? null,
                 'description' => $lapangan->description,
                 'price' => $lapangan->price,
-                'photo' => $lapangan->photo,
+                'photo' => $lapangan->photo_url,
                 'status' => $lapangan->status,
-                // Add availability status for the given date
                 'is_fully_booked_on_date' => $isFullyBooked,
             ];
         });
@@ -105,7 +106,7 @@ class BookingController extends Controller
                 'lapangan' => [
                     'id' => $booking->lapangan->id ?? null,
                     'name' => $booking->lapangan->name ?? null,
-                    'photo' => $booking->lapangan->photo ?? null,
+                    'photo' => $booking->lapangan->photo_url ?? null,
                 ],
                 'date' => Carbon::parse($booking->date)->format('Y-m-d'),
                 'start_time' => Carbon::parse($booking->start_time)->format('H:i'),
@@ -341,13 +342,12 @@ class BookingController extends Controller
     }
 
     /**
-     * REFACTOR: Pengecekan ketersediaan yang lebih akurat dan informatif.
-     * Mengembalikan semua sesi yang tersedia untuk satu hari beserta statusnya (booked/available).
+     * Pengecekan ketersediaan yang lebih akurat dan informatif.
+     * Mengembalikan semua sesi yang tersedia beserta status dan harganya.
      */
     public function checkAvailability(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            // BUG_FIX: Nama tabel 'lapangans'
             'lapangan_id' => 'required|exists:lapangans,id',
             'date' => 'required|date'
         ]);
@@ -356,30 +356,42 @@ class BookingController extends Controller
             return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
-        // 1. Ambil semua ID sesi yang sudah dibooking untuk lapangan dan tanggal tersebut
+        // Ambil data lapangan untuk mendapatkan harga dasar
+        $lapangan = Lapangan::findOrFail($request->lapangan_id);
+        $basePricePerHour = $lapangan->price;
+
+        // Ambil semua ID sesi yang sudah dibooking
         $bookedSessionIds = Booking::where('lapangan_id', $request->lapangan_id)
             ->where('date', $request->date)
-            ->whereIn('status', ['pending', 'confirmed']) // Hanya booking aktif
+            ->whereIn('status', ['pending', 'confirmed'])
             ->pluck('session_hours_ids')
-            ->flatten() // Mengubah array of arrays menjadi satu array
+            ->flatten()
             ->unique()
             ->toArray();
 
-        // 2. Ambil semua sesi yang ada di database
-        // Anda bisa filter berdasarkan hari jika diperlukan, misal:
-        // $dayName = Carbon::parse($request->date)->format('l'); // e.g., "Monday"
-        // $day = Day::where('name', $dayName)->first();
-        // $allSessions = SessionHour::where('day_id', $day->id)->get();
+        // Ambil semua sesi yang ada
         $allSessions = SessionHour::orderBy('start_time')->get();
 
-        // 3. Tambahkan status 'is_available' pada setiap sesi
-        $availabilityData = $allSessions->map(function ($session) use ($bookedSessionIds) {
+        // Tambahkan status 'is_available' dan 'price' pada setiap sesi
+        $availabilityData = $allSessions->map(function ($session) use ($bookedSessionIds, $basePricePerHour) {
+            // Logika kalkulasi harga disalin dari metode store()
+            $priceForSession = $basePricePerHour;
+            $startHour = (int) Carbon::parse($session->start_time)->format('H');
+
+            // Logika harga tambahan (contoh)
+            if ($startHour >= 15 && $startHour < 18) { // Sesi sore
+                $priceForSession += 25000;
+            } elseif ($startHour >= 18) { // Sesi malam
+                $priceForSession += 50000;
+            }
+
             return [
                 'id' => $session->id,
                 'description' => $session->description,
                 'start_time' => Carbon::parse($session->start_time)->format('H:i'),
                 'end_time' => Carbon::parse($session->end_time)->format('H:i'),
-                'is_available' => !in_array($session->id, $bookedSessionIds)
+                'is_available' => !in_array($session->id, $bookedSessionIds),
+                'price' => $priceForSession // **TAMBAHAN: Sertakan harga total sesi**
             ];
         });
 

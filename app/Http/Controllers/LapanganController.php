@@ -24,7 +24,7 @@ class LapanganController extends Controller
      */
     public function create()
     {
-        $categories = Category::all(); // Ambil semua kategori untuk dropdown
+        $categories = Category::all();
         return view('lapangans.create', compact('categories'));
     }
 
@@ -33,7 +33,7 @@ class LapanganController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'name' => 'required|string|max:255|unique:lapangans',
             'category_id' => 'required|exists:categories,id',
             'description' => 'nullable|string',
@@ -42,13 +42,9 @@ class LapanganController extends Controller
             'status' => 'required|in:available,unavailable',
         ]);
 
-        $data = $request->except('photo');
-
         if ($request->hasFile('photo')) {
-            // Simpan foto dan dapatkan path-nya
-            $path = $request->file('photo')->store('public/photos/lapangans');
-            // Ubah path agar bisa diakses dari web
-            $data['photo'] = Storage::url($path);
+            // Simpan foto di disk 'public' dalam folder 'lapangans' dan simpan path relatifnya.
+            $data['photo'] = $request->file('photo')->store('lapangans', 'public');
         }
 
         Lapangan::create($data);
@@ -71,7 +67,7 @@ class LapanganController extends Controller
      */
     public function update(Request $request, Lapangan $lapangan)
     {
-        $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('lapangans')->ignore($lapangan->id)],
             'category_id' => 'required|exists:categories,id',
             'description' => 'nullable|string',
@@ -80,16 +76,13 @@ class LapanganController extends Controller
             'status' => 'required|in:available,unavailable',
         ]);
 
-        $data = $request->except('photo');
-
         if ($request->hasFile('photo')) {
-            // Hapus foto lama jika ada
+            // Hapus foto lama dari storage jika ada.
             if ($lapangan->photo) {
-                Storage::delete(str_replace('/storage', 'public', $lapangan->photo));
+                Storage::disk('public')->delete($lapangan->photo);
             }
-            // Simpan foto baru
-            $path = $request->file('photo')->store('public/photos/lapangans');
-            $data['photo'] = Storage::url($path);
+            // Simpan foto baru dan dapatkan path relatifnya.
+            $data['photo'] = $request->file('photo')->store('lapangans', 'public');
         }
 
         $lapangan->update($data);
@@ -106,7 +99,7 @@ class LapanganController extends Controller
         try {
             // Hapus foto dari storage jika ada
             if ($lapangan->photo) {
-                Storage::delete(str_replace('/storage', 'public', $lapangan->photo));
+                Storage::disk('public')->delete($lapangan->photo);
             }
             $lapangan->delete();
             return redirect()->route('lapangans.index')
