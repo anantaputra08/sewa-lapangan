@@ -125,7 +125,7 @@
                                     </div>
                                     <div>
                                         <p class="font-semibold text-gray-900">Lapangan Badminton A1</p>
-                                        <p class="text-sm text-gray-500">Tersedia: 5 lapangan</p>
+                                        <p class="text-sm text-gray-500">Tersedia: 3 lapangan</p>
                                     </div>
                                 </div>
                                 <p class="font-bold text-blue-600">Rp 45.000/jam</p>
