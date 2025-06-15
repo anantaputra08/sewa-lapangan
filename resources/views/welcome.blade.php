@@ -55,15 +55,34 @@
                     <span class="text-xl font-bold text-gray-900">GOR Jayabaya</span>
                 </div>
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="#facilities" class="text-gray-600 hover:text-blue-600 transition-colors">Fasilitas</a>
-                    <a href="#pricing" class="text-gray-600 hover:text-blue-600 transition-colors">Harga</a>
-                    <a href="#contact" class="text-gray-600 hover:text-blue-600 transition-colors">Kontak</a>
-                    <button class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        Login
-                    </button>
-                    <button class="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition-colors">
-                        Daftar
-                    </button>
+                    <a href="#features" class="text-gray-600 hover:text-green-600 transition-colors">Fitur</a>
+                    <a href="#pricing" class="text-gray-600 hover:text-green-600 transition-colors">Harga</a>
+                    <a href="#contact" class="text-gray-600 hover:text-green-600 transition-colors">Kontak</a>
+                    @if (Route::has('login'))
+                        @auth
+                            <button
+                                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                <a href="{{ url('/dashboard') }}">
+                                    Dashboard
+                                </a>
+                            </button>
+                        @else
+                            <button
+                                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                <a href="{{ route('login') }}">
+                                    Log In
+                                </a>
+                            </button>
+                            @if (Route::has('register'))
+                                <button
+                                    class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                    <a href="{{ route('register') }}">
+                                        Register
+                                    </a>
+                                </button>
+                            @endif
+                        @endauth
+                    @endif
                 </div>
             </div>
         </div>
