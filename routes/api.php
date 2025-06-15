@@ -28,6 +28,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Route untuk logout
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::get('/bookings/check-availability', [BookingController::class, 'checkAvailability']);
+    Route::post('/bookings', [BookingController::class, 'store']);
 });
 
 // Route untuk mendapatkan daftar lapangan
