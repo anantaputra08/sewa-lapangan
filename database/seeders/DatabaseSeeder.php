@@ -29,6 +29,19 @@ class DatabaseSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
+        User::factory()->create([
+            'name' => 'Test Admin',
+            'email' => 'admin@example.com',
+            'password' => bcrypt('1234'),
+            'phone' => '081234567891',
+            'address' => 'Jl. Test No. 123',
+            'photo' => 'default.jpg',
+            'role' => 'admin',
+            'email_verified_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         $this->call([
             CategorySeeder::class,
             LapanganSeeder::class,

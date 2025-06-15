@@ -65,8 +65,8 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'phone' => 'nullable|string|max:15',
-            'address' => 'nullable|string',
+            // 'phone' => 'nullable|string|max:15',
+            // 'address' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -83,8 +83,8 @@ class AuthController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'phone' => $request->phone,
-                'address' => $request->address,
+                // 'phone' => $request->phone,
+                // 'address' => $request->address,
                 'role' => 'user', // Default role
             ]);
 
